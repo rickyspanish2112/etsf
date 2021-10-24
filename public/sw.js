@@ -1,5 +1,7 @@
+importScripts('/src/js/idb.js');
+importScripts('/src/js/utility.js');
 
-var CACHE_STATIC_NAME = 'static-v31';
+var CACHE_STATIC_NAME = 'static-v46';
 var CACHE_DYNAMIC_NAME = 'dynamic-v2';
 var STATIC_FILES = [
   '/',
@@ -8,6 +10,7 @@ var STATIC_FILES = [
   '/src/js/app.js',
   '/src/js/feed.js',
   '/src/js/promise.js',
+  '/src/js/idb.js',
   '/src/js/fetch.js',
   '/src/js/material.min.js',
   '/src/css/app.css',
@@ -17,6 +20,7 @@ var STATIC_FILES = [
   'https://fonts.googleapis.com/icon?family=Material+Icons',
   'https://cdnjs.cloudflare.com/ajax/libs/material-design-lite/1.3.0/material.indigo-pink.min.css'
 ]
+
 
 // function trimCache(cacheName, maxItems) {
 //   caches.open(cacheName)
@@ -72,23 +76,34 @@ function isInArray(string, array) {
 
 
 self.addEventListener('fetch', function (event) {
-  var url = 'https://httpbin.org/get';
+  var url = 'https://pwagram-ce869-default-rtdb.europe-west1.firebasedatabase.app/posts';
   if (event.request.url.indexOf(url) > -1) {  //Strategy: Cache then network and dynamic caching (see Feed.js for counter part.)
     event.respondWith(
-      caches.open(CACHE_DYNAMIC_NAME)
-        .then(function (cache) {
-          return fetch(event.request)
-            .then(function (res) {
-              // trimCache(CACHE_DYNAMIC_NAME, 3);
-              cache.put(event.request, res.clone());
-              return res;
+      // caches.open(CACHE_DYNAMIC_NAME) //No longer need to look in browser cache as we are using IndexedDB
+      //   .then(function (cache) {
+      fetch(event.request)
+        .then(function (res) {
+          // trimCache(CACHE_DYNAMIC_NAME, 3);
+          //cache.put(event.request, res.clone()); This would put the response in the browser cache
+          var clonedRes = res.clone();
+          clearAllData('posts')
+            .then(function () {
+              return clonedRes.json();
+            })
+            .then(function (data) {
+              for (var key in data) {
+                writeData('posts', data[key]);
+              }
             });
+          return res;
         })
+      // })
     )
   } else if (isInArray(event.request.url, STATIC_FILES)) { //Strategy: Cache only (use for static assets)
     event.respondWith(
       caches.match(event.request)
-    )} 
+    )
+  }
   else {
     event.respondWith(
       caches.match(event.request) //Strategy: Cache then network fallback
@@ -107,10 +122,10 @@ self.addEventListener('fetch', function (event) {
               .catch(function (err) {
                 return caches.open(CACHE_STATIC_NAME)
                   .then(function (cache) {
-                    if(event.request.headers.get('accept').includes('text/html')){
+                    if (event.request.headers.get('accept').includes('text/html')) {
                       return cache.match('/offline.html');
                     }
-                   
+
                   })
               });
           }
