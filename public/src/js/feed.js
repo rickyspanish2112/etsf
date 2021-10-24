@@ -3,6 +3,14 @@ var createPostArea = document.querySelector('#create-post');
 var closeCreatePostModalButton = document.querySelector('#close-create-post-modal-btn');
 var etsfArea = document.querySelector('#etsf-table-body');
 
+
+function updateUI(data) {
+  clearCards();
+  for (var i = 0; i < data.length; i++) {
+    createCard(data[i]);
+  }
+}
+
 function openCreatePostModal() {
   createPostArea.style.display = 'block';
   if (deferredPrompt) {
@@ -43,24 +51,23 @@ closeCreatePostModalButton.addEventListener('click', closeCreatePostModal);
 
 
 
-function createCard() {
+function createCard(data) {
   var tableRow = document.createElement('tr');
   var awbTableDataRow = document.createElement('td')
   awbTableDataRow.className = 'mdl-data-table__cell--non-numeric'
-  awbTableDataRow.textContent = '125-12345678';
+  awbTableDataRow.textContent = `${data.prefix}-${data.master}`;
   var hawb = document.createElement('td');
   hawb.className = 'mdl-data-table__cell--non-numeric'
-  hawb.textContent = 'HAWB0001';
+  hawb.textContent = `${data.house}`;
   var split = document.createElement('td');
-  split.textContent = '01';
+  split.textContent = `${data.split}`;
   var npx = document.createElement('td');
-  npx.textContent = '10';
+  npx.textContent = `${data.npx}`;
   var npr = document.createElement('td');
-  npr.textContent = '10';
-
+  npr.textContent = `${data.npr}`;
   var description = document.createElement('td');
   description.className = 'mdl-data-table__cell--non-numeric'
-  description.textContent = 'STUFF';
+  description.textContent = `${data.description}`;
 
   // var cardSaveButton = document.createElement('button');
   //   cardSaveButton.textContent = 'Save';
@@ -81,44 +88,59 @@ function createCard() {
 
 
 function clearCards() {
-  while(etsfArea.hasChildNodes()) {
+  while (etsfArea.hasChildNodes()) {
     etsfArea.removeChild(etsfArea.lastChild);
   }
 }
 
 //Strategy: Cache then network and dynamic caching (see SW.js for counter part.)
-var url = 'https://httpbin.org/get';
-var networkDateReceived = false;
+var url = 'https://pwagram-ce869-default-rtdb.europe-west1.firebasedatabase.app/posts.json';
+var networkDataReceived = false;
+
 fetch(url)
-  .then(function (res) {
+  .then(function(res) {
     return res.json();
   })
-  .then(function (data) {
-    networkDateReceived = true;
-    console.log('From web', data)
-    console.log('about to clear card')
-    clearCards();
-    createCard();
+  .then(function(data) {
+    networkDataReceived = true;
+    console.log('From web', data);
+    var dataArray = [];
+    for (var key in data) {
+      dataArray.push(data[key]);
+    }
+    updateUI(dataArray);
   });
 
-
-if ('caches' in window) {
-  caches.match(url)
-    .then(function (res) {
-      if (res) {
-        return res.json();
+if ('indexedDB' in window) {
+  readAllData('posts')
+    .then(function(data) {
+      if (!networkDataReceived) {
+        console.log('From cache', data);
+        updateUI(data);
       }
-    })
-    .then(function (data) {
-      console.log('From cache', data);
-      if (!networkDateReceived) {
-        console.log('about to clear card')
-        clearCards();
-        createCard();
-      }
-
     });
-
- 
-
 }
+
+
+  //Using browser cache
+// if ('caches' in window) { 
+//   caches.match(url)
+//     .then(function (res) {
+//       if (res) {
+//         return res.json();
+//       }
+//     })
+//     .then(function (data) {
+//       console.log('From cache', data);
+//       if (!networkDateReceived) {
+//         var dataArray = [];
+//         for (var key in data) {
+//           writeData('posts', data[key]);
+//           //dataArray.push(data[key]);
+//         }
+//         clearCards();
+//         updateUI(dataArray);
+//       }
+
+//     });
+// }
