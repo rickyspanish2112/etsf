@@ -1,7 +1,7 @@
 importScripts('/src/js/idb.js');
 importScripts('/src/js/utility.js');
 
-var CACHE_STATIC_NAME = 'static-v46';
+var CACHE_STATIC_NAME = 'static-v56';
 var CACHE_DYNAMIC_NAME = 'dynamic-v2';
 var STATIC_FILES = [
   '/',
@@ -16,6 +16,7 @@ var STATIC_FILES = [
   '/src/css/app.css',
   '/src/css/feed.css',
   '/src/images/main-image.jpg',
+  '/src/images/asm-logo.jpg',
   'https://fonts.googleapis.com/css?family=Roboto:400,700',
   'https://fonts.googleapis.com/icon?family=Material+Icons',
   'https://cdnjs.cloudflare.com/ajax/libs/material-design-lite/1.3.0/material.indigo-pink.min.css'

@@ -30,6 +30,31 @@
   margin: 10px auto;
 }
 
-.shared-moment-card.mdl-card {
+
+#etsf-table
+{
   margin: 10px auto;
+}
+
+
+#etsf-table {
+  margin: 10px auto;
+  /*width: 270px;*/
+  width: 80%;
+}
+
+@media (min-width: 600px) {
+  #etsf-table{
+    width: 60%;
+  }
+}
+
+@media (min-width: 1000px) {
+  #etsf-table {
+    width: 45%;
+  }
+}
+
+#etsf-table {
+  height: 140px;
 }
