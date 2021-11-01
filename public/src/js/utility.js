@@ -1,8 +1,12 @@
+
 var dbPromise = idb.open('posts-store', 1, function (db) {
-    if (!db.objectStoreNames.contains('posts')) {
-      db.createObjectStore('posts', {keyPath: 'id'});
-    }
-  });
+  if (!db.objectStoreNames.contains('posts')) {
+    db.createObjectStore('posts', {keyPath: 'id'});
+  }
+  if (!db.objectStoreNames.contains('sync-posts')) {
+    db.createObjectStore('sync-posts', {keyPath: 'id'});
+  }
+});
   
   function writeData(st, data) {
     return dbPromise
@@ -14,10 +18,10 @@ var dbPromise = idb.open('posts-store', 1, function (db) {
       });
   }
 
-
   function readAllData(st) {
     return dbPromise
       .then(function(db) {
+        console.log('About to read data from:', st);
         var tx = db.transaction(st, 'readonly');
         var store = tx.objectStore(st);
         return store.getAll();
