@@ -3,6 +3,15 @@ var createPostArea = document.querySelector('#create-post');
 var closeCreatePostModalButton = document.querySelector('#close-create-post-modal-btn');
 var etsfArea = document.querySelector('#etsf-table-body');
 
+var form = document.querySelector('form');
+var prefix = document.querySelector('#prefix');
+var master = document.querySelector('#master');
+var house = document.querySelector('#house');
+var split = document.querySelector('#split');
+var npx = document.querySelector('#npx');
+var npr = document.querySelector('#npr');
+var description = document.querySelector('#description');
+
 
 function updateUI(data) {
   clearCards();
@@ -124,6 +133,74 @@ if ('indexedDB' in window) {
       }
     });
 }
+
+form.addEventListener('submit', function(event) {
+  event.preventDefault();
+
+  if (prefix.value.trim() === '' || master.value.trim() === '') {
+    alert('Please enter valid data!');
+    return;
+  }
+
+  closeCreatePostModal();
+
+  if ('serviceWorker' in navigator && 'SyncManager' in window) {
+    navigator.serviceWorker.ready
+      .then(function(sw) {
+        var post = {
+          id: new Date().toISOString(),
+          prefix: prefix.value,
+          master: master.value,
+          house: house.value,
+          split: split.value,
+          npr: npr.value,
+          npx: npx.value,
+          description: description.value
+        };
+        writeData('sync-posts', post)
+          .then(function() {
+            return sw.sync.register('sync-new-posts');
+          })
+          .then(function() {
+            var snackbarContainer = document.querySelector('#confirmation-toast');
+            var data = {message: 'Your Post was saved for syncing!'};
+            snackbarContainer.MaterialSnackbar.showSnackbar(data);
+          })
+          .catch(function(err) {
+            console.log(err);
+          });
+      });
+  } else {
+    sendData();
+  }
+});
+
+function sendData() {
+  fetch('https://us-central1-pwagram-ce869.cloudfunctions.net/storePostData', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
+    body: JSON.stringify({
+      id: new Date().toISOString(),
+      prefix: prefix.value,
+      master: master.value,
+      house: house.value,
+      split: split.value,
+      npr: npr.value,
+      npx: npx.value,
+      description: description.value
+    })
+  })
+    .then(function(res) {
+      console.log('Sent data', res);
+      updateUI();
+    })
+}
+
+
+
 
 
   //Using browser cache

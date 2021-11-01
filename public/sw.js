@@ -1,7 +1,7 @@
 importScripts('/src/js/idb.js');
 importScripts('/src/js/utility.js');
 
-var CACHE_STATIC_NAME = 'static-v56';
+var CACHE_STATIC_NAME = 'static-v61';
 var CACHE_DYNAMIC_NAME = 'dynamic-v2';
 var STATIC_FILES = [
   '/',
@@ -134,6 +134,54 @@ self.addEventListener('fetch', function (event) {
     )
   }
 });
+
+
+self.addEventListener('sync', function(event) {
+  console.log('[Service Worker] Background syncing', event);
+  if (event.tag === 'sync-new-posts') {
+    console.log('[Service Worker] Syncing new Posts');
+    event.waitUntil(
+      readAllData('sync-posts')
+        .then(function(data) {
+          for (var dt of data) {
+            console.log('About to post data to Firebase', dt);
+            fetch('https://us-central1-pwagram-ce869.cloudfunctions.net/storePostData', { 
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+              },
+              body: JSON.stringify({
+                id: dt.id,
+                prefix: dt.prefix,
+                master: dt.master,
+                house: dt.house,
+                split: dt.split,
+                npr: dt.npr,
+                npx: dt.npx,
+                description: dt.description
+              })
+            })
+              .then(function(res) {
+                console.log('Sent data', res);
+                if (res.ok) {
+                  res.json()
+                    .then(function(resData) {
+                      console.log('IndexedDB Id:', resData.id);
+                      deleteItemFromData('sync-posts', resData.id);
+                    });
+                }
+              })
+              .catch(function(err) {
+                console.log('Error while sending data', err);
+              });
+          }
+        })
+    );
+  }
+});
+
+
 
 //Strategy: Cache then network
 //self.addEventListener('fetch', function (event) {
