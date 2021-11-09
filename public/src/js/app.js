@@ -51,6 +51,51 @@ function displayConfirmNotification() {
 }
 
 
+function configurePushSub() {
+  if (!('serviceWorker' in navigator)) {
+    return;
+  }
+
+  var reg;
+  navigator.serviceWorker.ready
+    .then(function(swreg) {
+      reg = swreg;
+      return swreg.pushManager.getSubscription();
+    })
+    .then(function(sub) {
+      if (sub === null) {
+        // Create a new subscription
+        var vapidPublicKey = 'BAsCp7wsjDyO711FWHwEX7U_7dFGZqy52M7Ag2ZzJFOSoqmF0J7Kindu5fjNfq8RZDebdZt4MBzpRwQzmpBnA8Y';
+        var convertedVapidPublicKey = urlBase64ToUint8Array(vapidPublicKey);
+        return reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: convertedVapidPublicKey
+        });
+      } else {
+        // We have a subscription
+      }
+    })
+    .then(function(newSub) {
+      return fetch('https://pwagram-ce869-default-rtdb.europe-west1.firebasedatabase.app/subscriptions.json', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(newSub)
+      })
+    })
+    .then(function(res) {
+      if (res.ok) {
+        displayConfirmNotification();
+      }
+    })
+    .catch(function(err) {
+      console.log(err);
+    });
+}
+
+
 
 function askForNotificationPermission() {
   Notification.requestPermission(function(result) {
@@ -58,7 +103,8 @@ function askForNotificationPermission() {
     if (result !== 'granted') {
       console.log('No notification permission granted!');
     } else {
-      displayConfirmNotification();
+     // displayConfirmNotification();
+     configurePushSub();
     }
   });
 }
