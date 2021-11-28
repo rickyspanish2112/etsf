@@ -43,7 +43,7 @@ exports.storePostData = functions.https.onRequest(function (request, response) {
           webpush.sendNotification(pushConfig, JSON.stringify(
             {
               title: 'ETSF Record Added',
-              content: 'Awb record added!',
+              content: 'AWB' + ' ' + request.body.prefix + ' - ' + request.body.master + ' ' + 'added!',
               openUrl: '/'
             }))
             .catch(function (err) {
