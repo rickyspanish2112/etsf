@@ -18,13 +18,13 @@ exports.storePostData = functions.https.onRequest(function (request, response) {
   cors(request, response, function () {
     admin.database().ref('posts').push({
       id: request.body.id,
-        prefix: request.body.prefix,
-        master: request.body.master,
-        house: request.body.house,
-        split: request.body.split,
-        npr: request.body.npr,
-        npx: request.body.npx,
-        description: request.body.description
+      prefix: request.body.prefix,
+      master: request.body.master,
+      house: request.body.house,
+      split: request.body.split,
+      npr: request.body.npr,
+      npx: request.body.npx,
+      description: request.body.description
     })
       .then(function () {
         webpush.setVapidDetails('mailto:ross.starkey@outlook.com', 'BMlO0oZWg8hV_Y6zvSrSllEcmFJL_TcSWkQLpqn8Axnreur7ycCiW_mpA9OhCFq2Dfga5Y1XEwIpd9HdqA_GWv4', 'jKLqWrY7XgH87lI-8fQFeAqSOXAdZQFqDGqSpQkNoMg');
@@ -40,15 +40,20 @@ exports.storePostData = functions.https.onRequest(function (request, response) {
             }
           };
 
-          webpush.sendNotification(pushConfig, JSON.stringify({title: 'New Post', content: 'New Post added!', openUrl: '/'}))
-            .catch(function(err) {
+          webpush.sendNotification(pushConfig, JSON.stringify(
+            {
+              title: 'ETSF Record Added',
+              content: 'Awb record added!',
+              openUrl: '/'
+            }))
+            .catch(function (err) {
               console.log(err);
             })
         });
-        response.status(201).json({message: 'Data stored', id: request.body.id});
+        response.status(201).json({ message: 'Data stored', id: request.body.id });
       })
       .catch(function (err) {
-        response.status(500).json({error: err});
+        response.status(500).json({ error: err });
       });
   });
 });
