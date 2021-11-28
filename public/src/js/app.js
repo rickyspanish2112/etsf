@@ -95,19 +95,29 @@ function configurePushSub() {
     });
 }
 
-
-
 function askForNotificationPermission() {
-  Notification.requestPermission(function(result) {
-    console.log('User Choice', result);
-    if (result !== 'granted') {
-      console.log('No notification permission granted!');
-    } else {
-     // displayConfirmNotification();
-     configurePushSub();
-    }
-  });
+  Notification.requestPermission()
+    .then(function(permission) {
+      console.log('User Choice', permission);
+      if (permission !== 'granted') {
+        console.log('No notification permission granted!');
+      } else {
+        configurePushSub();
+      }
+    });
 }
+
+// function askForNotificationPermission() {
+//   Notification.requestPermission(function(result) {
+//     console.log('User Choice', result);
+//     if (result !== 'granted') {
+//       console.log('No notification permission granted!');
+//     } else {
+//      // displayConfirmNotification();
+//      configurePushSub();
+//     }
+//   });
+// }
 
 if ('Notification' in window) {
   for (var i = 0; i < enableNotificationsButtons.length; i++) {
