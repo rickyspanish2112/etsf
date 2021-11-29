@@ -117,7 +117,7 @@ function askForNotificationPermission() {
 //      configurePushSub();
 //     }
 //   });
-// }
+// }      
 
 if ('Notification' in window) {
   for (var i = 0; i < enableNotificationsButtons.length; i++) {
